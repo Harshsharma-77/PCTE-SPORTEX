@@ -5,11 +5,8 @@ import {
   Shield,
   Zap,
   Users,
-  QrCode,
   ArrowRight,
-  Database,
   Radio,
-  Lock,
 } from 'lucide-react';
 import { ApiStatusBadge } from '../components/common/ApiStatusBadge';
 
@@ -63,10 +60,10 @@ export const HomePage: React.FC = () => {
   ];
 
   const highlights = [
-    { label: 'Real-Time WebSocket Scoring', value: '<50ms latency', icon: Radio },
-    { label: 'Normalized PostgreSQL Models', value: '22 Core Entities', icon: Database },
-    { label: 'Cryptographic QR Verification', value: 'UUID Signed', icon: QrCode },
-    { label: 'Granular Access Control', value: '6 Roles Enforced', icon: Lock },
+    { label: 'Varsity Disciplines', value: '8 Active Sports', icon: Trophy },
+    { label: 'Campus Franchises', value: '16 Teams Competing', icon: Shield },
+    { label: 'Student Athletes', value: '500+ Registered', icon: Users },
+    { label: 'Live Arena Scoring', value: 'Real-Time Telemetry', icon: Zap },
   ];
 
   return (
