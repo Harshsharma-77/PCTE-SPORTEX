@@ -1,0 +1,798 @@
+// =============================================================================
+// PCTE SPORTEX — College Sports Management System Database Schema
+// Provider: PostgreSQL via Prisma ORM
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum UserRoleEnum {
+  SUPER_ADMIN
+  SPORTS_ADMIN
+  COACH
+  STUDENT
+  REFEREE
+  VIEWER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum SportCategory {
+  TEAM
+  INDIVIDUAL
+  RACQUET
+  ATHLETICS
+  COMBAT
+  AQUATICS
+}
+
+enum ScoringType {
+  GOALS
+  RUNS_WICKETS
+  POINTS
+  SETS
+  TIME_DISTANCE
+}
+
+enum TournamentFormat {
+  KNOCKOUT
+  ROUND_ROBIN
+  GROUP_STAGE_KNOCKOUT
+  DOUBLE_ELIMINATION
+}
+
+enum TournamentStatus {
+  UPCOMING
+  REGISTRATION_OPEN
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  WARMUP
+  LIVE
+  PAUSED
+  COMPLETED
+  POSTPONED
+  CANCELLED
+  DISPUTED
+}
+
+enum MatchEventType {
+  GOAL
+  POINT
+  WICKET
+  RUNS
+  TRY
+  FOUL
+  YELLOW_CARD
+  RED_CARD
+  SUBSTITUTION
+  TIMEOUT
+  PENALTY
+  PERIOD_START
+  PERIOD_END
+  CUSTOM
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+  LATE
+}
+
+enum CertificateType {
+  WINNER
+  RUNNER_UP
+  THIRD_PLACE
+  PARTICIPATION
+  BEST_PLAYER
+  BEST_GOALKEEPER
+  FAIR_PLAY
+  CUSTOM
+}
+
+enum EquipmentCondition {
+  NEW
+  GOOD
+  FAIR
+  DAMAGED
+  UNDER_MAINTENANCE
+  RETIRED
+}
+
+enum IssueStatus {
+  REQUESTED
+  APPROVED
+  ISSUED
+  RETURNED
+  OVERDUE
+  DAMAGED
+  LOST
+}
+
+enum FeedbackCategory {
+  FACILITY
+  EQUIPMENT
+  MATCH_DISPUTE
+  COACHING
+  SCHEDULING
+  OTHER
+}
+
+enum FeedbackStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  REJECTED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// -----------------------------------------------------------------------------
+// 1. RBAC & PERMISSION ENTITIES
+// -----------------------------------------------------------------------------
+
+model Role {
+  id          String           @id @default(uuid())
+  name        UserRoleEnum     @unique
+  displayName String
+  description String?
+  isSystem    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@index([name])
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  code        String           @unique // e.g. "tournaments:create", "live_score:update"
+  module      String           // e.g. "Tournaments", "Scoring", "Users", "Inventory"
+  description String
+  createdAt   DateTime         @default(now())
+
+  roles       RolePermission[]
+
+  @@index([code])
+  @@index([module])
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+// -----------------------------------------------------------------------------
+// 2. USER & PROFILE ENTITIES
+// -----------------------------------------------------------------------------
+
+model User {
+  id               String          @id @default(uuid())
+  email            String          @unique
+  passwordHash     String
+  name             String
+  roleId           String?
+  role             Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  roleEnum         UserRoleEnum    @default(STUDENT) // Fast enum check
+  avatarUrl        String?
+  phone            String?
+  isActive         Boolean         @default(true)
+  isVerified       Boolean         @default(false)
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Profiles (1-to-1)
+  student          Student?
+  coach            Coach?
+  referee          Referee?
+
+  // Relations
+  refreshTokens    RefreshToken[]
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+  sentAnnouncements Announcement[] @relation("AnnouncementAuthor")
+  feedbacks        Feedback[]      @relation("UserFeedback")
+  assignedFeedbacks Feedback[]     @relation("AssignedFeedback")
+  equipmentIssues  EquipmentIssue[] @relation("IssuedToUser")
+  approvedIssues   EquipmentIssue[] @relation("ApprovedByUser")
+
+  @@index([email])
+  @@index([roleEnum])
+  @@index([roleId])
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  tokenHash   String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent   String?
+  ipAddress   String?
+  expiresAt   DateTime
+  isRevoked   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model Student {
+  id               String           @id @default(uuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumber       String           @unique
+  department       String           // e.g. CSE, IT, ME, ECE, BBA, BPharm
+  batchYear        Int              // e.g. 2023, 2024, 2025
+  semester         Int              // 1 to 8
+  gender           Gender           @default(MALE)
+  bloodGroup       String?
+  emergencyContact String?
+  isEligible       Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  teamMemberships  TeamMember[]
+  matchEvents      MatchEvent[]     @relation("StudentMatchEvents")
+  playerStats      PlayerStatistic[]
+  attendanceRecords Attendance[]
+  certificates     Certificate[]
+
+  @@index([rollNumber])
+  @@index([department])
+}
+
+model Coach {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization  String       // Football, Cricket, Basketball, etc.
+  qualification   String?      // Certified Coach, NIS Diploma, AFC License
+  experienceYears Int          @default(0)
+  bio             String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  teams           Team[]
+  attendanceSessions Attendance[] @relation("CoachAttendance")
+}
+
+model Referee {
+  id               String       @id @default(uuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  licenseNumber    String?
+  officiatingLevel String       @default("COLLEGE") // DISTRICT, STATE, NATIONAL, COLLEGE
+  certifiedSports  String[]     // Array of sport names
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  matchesOfficiated Match[]     @relation("RefereeMatches")
+}
+
+// -----------------------------------------------------------------------------
+// 3. SPORTS & VENUES
+// -----------------------------------------------------------------------------
+
+model Sport {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  slug           String          @unique
+  category       SportCategory   @default(TEAM)
+  scoringType    ScoringType     @default(POINTS)
+  minPlayers     Int             @default(1)
+  maxPlayers     Int             @default(11)
+  benchSize      Int             @default(5)
+  rulesDocUrl    String?
+  rulesJson      Json?           // Rule parameters (duration, periods, points for win)
+  iconUrl        String?
+  bannerUrl      String?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  // Relations
+  teams          Team[]
+  tournaments    Tournament[]
+  equipment      Equipment[]
+  playerStats    PlayerStatistic[]
+  attendance     Attendance[]
+  certificates   Certificate[]
+
+  @@index([slug])
+  @@index([category])
+}
+
+model Venue {
+  id              String     @id @default(uuid())
+  name            String     // e.g. "PCTE Main Stadium", "Campus II Indoor Court"
+  location        String     // e.g. "Campus II Ground Floor"
+  capacity        Int?       @default(200)
+  supportedSports String[]   // e.g. ["Football", "Cricket", "Athletics"]
+  isIndoor        Boolean    @default(false)
+  isActive        Boolean    @default(true)
+  notes           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  matches         Match[]
+}
+
+// -----------------------------------------------------------------------------
+// 4. TEAMS & SQUADS
+// -----------------------------------------------------------------------------
+
+model Team {
+  id             String          @id @default(uuid())
+  name           String
+  slug           String          @unique
+  sportId        String
+  sport          Sport           @relation(fields: [sportId], references: [id], onDelete: Restrict)
+  department     String?         // Department or House
+  coachId        String?
+  coach          Coach?          @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  logoUrl        String?
+  jerseyColor    String?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  // Relations
+  members         TeamMember[]
+  tournamentTeams TournamentTeam[]
+  homeMatches     Match[]        @relation("HomeTeam")
+  awayMatches     Match[]        @relation("AwayTeam")
+  wonMatches      Match[]        @relation("WinningTeam")
+  pointsEntries   PointsTableEntry[]
+
+  @@index([sportId])
+  @@index([department])
+}
+
+model TeamMember {
+  id            String    @id @default(uuid())
+  teamId        String
+  team          Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  studentId     String
+  student       Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  jerseyNumber  Int?
+  position      String?   // Striker, Goalkeeper, Batsman, Point Guard, etc.
+  isCaptain     Boolean   @default(false)
+  isViceCaptain Boolean   @default(false)
+  joinedAt      DateTime  @default(now())
+  isActive      Boolean   @default(true)
+
+  @@unique([teamId, studentId])
+  @@index([teamId])
+  @@index([studentId])
+}
+
+// -----------------------------------------------------------------------------
+// 5. TOURNAMENTS & BRACKETS
+// -----------------------------------------------------------------------------
+
+model Tournament {
+  id           String           @id @default(uuid())
+  name         String           // e.g. "PCTE ATHLOS 2026 Inter-Department Cup"
+  slug         String           @unique
+  academicYear String           // e.g. "2025-2026"
+  sportId      String
+  sport        Sport            @relation(fields: [sportId], references: [id], onDelete: Restrict)
+  format       TournamentFormat @default(KNOCKOUT)
+  status       TournamentStatus @default(UPCOMING)
+  description  String?
+  bannerUrl    String?
+  startDate    DateTime
+  endDate      DateTime
+  maxTeams     Int              @default(16)
+  rulesJson    Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  registeredTeams TournamentTeam[]
+  matches         Match[]
+  pointsTable     PointsTableEntry[]
+  certificates    Certificate[]
+
+  @@index([sportId])
+  @@index([status])
+  @@index([academicYear])
+}
+
+model TournamentTeam {
+  id           String     @id @default(uuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId       String
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  seed         Int?
+  groupName    String?    // e.g. "Group A", "Group B"
+  isRegistered Boolean    @default(true)
+  registeredAt DateTime   @default(now())
+
+  @@unique([tournamentId, teamId])
+  @@index([tournamentId])
+  @@index([teamId])
+}
+
+// -----------------------------------------------------------------------------
+// 6. MATCHES & LIVE SCORING
+// -----------------------------------------------------------------------------
+
+model Match {
+  id              String      @id @default(uuid())
+  matchNumber     Int?
+  tournamentId    String
+  tournament      Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  roundName       String      // e.g. "Quarter Final 1", "Round of 16", "Final"
+  bracketLevel    Int         @default(1)
+  
+  homeTeamId      String
+  homeTeam        Team        @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeamId      String
+  awayTeam        Team        @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  
+  venueId         String?
+  venue           Venue?      @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  
+  refereeId       String?
+  referee         Referee?    @relation("RefereeMatches", fields: [refereeId], references: [id], onDelete: SetNull)
+  
+  scheduledDate   DateTime
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+  
+  status          MatchStatus @default(SCHEDULED)
+  currentPeriod   String?     // "1st Half", "2nd Half", "Q3", "Set 2", "Innings 1"
+  matchTimerSec   Int         @default(0)
+  isClockRunning  Boolean     @default(false)
+  
+  // Aggregate Scores
+  homeScore       Int         @default(0)
+  awayScore       Int         @default(0)
+  homeSubScore    String?     // e.g. "156/4 (20 ov)" or "21-18, 19-21"
+  awaySubScore    String?     // e.g. "152/9 (20 ov)" or "18-21, 21-19"
+  scoreBreakdown  Json?       // Period-by-period breakdown
+  
+  winnerTeamId    String?
+  winnerTeam      Team?       @relation("WinningTeam", fields: [winnerTeamId], references: [id], onDelete: SetNull)
+  isDraw          Boolean     @default(false)
+  
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  events          MatchEvent[]
+
+  @@index([tournamentId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model MatchEvent {
+  id             String         @id @default(uuid())
+  matchId        String
+  match          Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  
+  eventType      MatchEventType
+  timestampSec   Int            // Match clock seconds when event occurred
+  period         String?        // "1st Half", "Q2", "Set 1"
+  
+  teamId         String?
+  studentId      String?
+  student        Student?       @relation("StudentMatchEvents", fields: [studentId], references: [id], onDelete: SetNull)
+  
+  assistPlayerId String?
+  scoreValue     Int            @default(1)
+  commentary     String?
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+
+  @@index([matchId])
+  @@index([studentId])
+  @@index([eventType])
+}
+
+// -----------------------------------------------------------------------------
+// 7. STANDINGS & LEADERBOARDS
+// -----------------------------------------------------------------------------
+
+model PointsTableEntry {
+  id             String     @id @default(uuid())
+  tournamentId   String
+  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId         String
+  team           Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  played         Int        @default(0)
+  won            Int        @default(0)
+  lost           Int        @default(0)
+  drawn          Int        @default(0)
+  noResult       Int        @default(0)
+  
+  pointsFor      Float      @default(0)
+  pointsAgainst  Float      @default(0)
+  goalDifference Float      @default(0)
+  
+  totalPoints    Int        @default(0)
+  rank           Int        @default(1)
+  
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([tournamentId, teamId])
+  @@index([tournamentId])
+  @@index([teamId])
+  @@index([totalPoints, goalDifference])
+}
+
+model PlayerStatistic {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sportId       String
+  sport         Sport    @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  
+  matchesPlayed Int      @default(0)
+  goalsScored   Int      @default(0)
+  runsScored    Int      @default(0)
+  wicketsTaken  Int      @default(0)
+  pointsScored  Int      @default(0)
+  assists       Int      @default(0)
+  cleanSheets   Int      @default(0)
+  yellowCards   Int      @default(0)
+  redCards      Int      @default(0)
+  mvpAwards     Int      @default(0)
+  minutesPlayed Int      @default(0)
+  customStats   Json?
+  
+  updatedAt     DateTime @updatedAt
+
+  @@unique([studentId, sportId])
+  @@index([studentId])
+  @@index([sportId])
+}
+
+// -----------------------------------------------------------------------------
+// 8. ATTENDANCE
+// -----------------------------------------------------------------------------
+
+model Attendance {
+  id          String           @id @default(uuid())
+  sessionDate DateTime
+  sportId     String
+  sport       Sport            @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  coachId     String
+  coach       Coach            @relation("CoachAttendance", fields: [coachId], references: [id], onDelete: Cascade)
+  
+  status      AttendanceStatus @default(PRESENT)
+  sessionType String           @default("TRAINING") // TRAINING, PRACTICE_MATCH, FITNESS
+  remarks     String?
+  createdAt   DateTime         @default(now())
+
+  @@unique([sessionDate, studentId, sportId])
+  @@index([sessionDate])
+  @@index([studentId])
+  @@index([sportId])
+}
+
+// -----------------------------------------------------------------------------
+// 9. CERTIFICATES & QR VERIFICATION
+// -----------------------------------------------------------------------------
+
+model Certificate {
+  id               String          @id @default(uuid())
+  certificateNo    String          @unique // SPORTEX/2026/FOOTBALL/001
+  verificationUuid String          @unique @default(uuid())
+  
+  studentId        String
+  student          Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  tournamentId     String
+  tournament       Tournament      @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  
+  sportId          String
+  sport            Sport           @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  
+  type             CertificateType @default(PARTICIPATION)
+  title            String
+  achievement      String
+  issueDate        DateTime        @default(now())
+  
+  issuedByAdmin    String          // Signatory authority name
+  qrCodeUrl        String?
+  pdfUrl           String?
+  isRevoked        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+
+  @@index([verificationUuid])
+  @@index([certificateNo])
+  @@index([studentId])
+  @@index([tournamentId])
+}
+
+// -----------------------------------------------------------------------------
+// 10. EQUIPMENT & INVENTORY
+// -----------------------------------------------------------------------------
+
+model Equipment {
+  id                String             @id @default(uuid())
+  name              String
+  sku               String             @unique // e.g. EQ-FB-001
+  sportId           String
+  sport             Sport              @relation(fields: [sportId], references: [id], onDelete: Restrict)
+  
+  totalQuantity     Int                @default(1)
+  availableQuantity Int                @default(1)
+  condition         EquipmentCondition @default(GOOD)
+  storageLocation   String?
+  costPerItem       Float?
+  purchaseDate      DateTime?
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  issues            EquipmentIssue[]
+
+  @@index([sportId])
+  @@index([sku])
+}
+
+model EquipmentIssue {
+  id               String             @id @default(uuid())
+  equipmentId      String
+  equipment        Equipment          @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  
+  issuedToUserId   String
+  issuedTo         User               @relation("IssuedToUser", fields: [issuedToUserId], references: [id], onDelete: Cascade)
+  
+  approvedByUserId String?
+  approvedBy       User?              @relation("ApprovedByUser", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  
+  quantity         Int                @default(1)
+  issueDate        DateTime           @default(now())
+  dueDate          DateTime
+  returnDate       DateTime?
+  
+  status           IssueStatus        @default(ISSUED)
+  returnCondition  EquipmentCondition?
+  fineAmount       Float              @default(0)
+  remarks          String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([equipmentId])
+  @@index([issuedToUserId])
+  @@index([status])
+}
+
+// -----------------------------------------------------------------------------
+// 11. FEEDBACK & GRIEVANCES
+// -----------------------------------------------------------------------------
+
+model Feedback {
+  id               String           @id @default(uuid())
+  ticketNumber     String           @unique // e.g. TKT-2026-001
+  userId           String
+  user             User             @relation("UserFeedback", fields: [userId], references: [id], onDelete: Cascade)
+  
+  category         FeedbackCategory @default(OTHER)
+  priority         Priority         @default(MEDIUM)
+  subject          String
+  description      String
+  attachmentUrl    String?
+  
+  status           FeedbackStatus   @default(PENDING)
+  assignedToUserId String?
+  assignedTo       User?            @relation("AssignedFeedback", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  
+  resolutionNotes  String?
+  resolvedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([ticketNumber])
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+}
+
+// -----------------------------------------------------------------------------
+// 12. NOTIFICATIONS & ANNOUNCEMENTS
+// -----------------------------------------------------------------------------
+
+model Announcement {
+  id             String    @id @default(uuid())
+  title          String
+  content        String
+  bannerUrl      String?
+  priority       Priority  @default(MEDIUM)
+  authorId       String
+  author         User      @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetAudience String    @default("ALL")
+  expiresAt      DateTime?
+  isPinned       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([isPinned])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("SYSTEM")
+  actionUrl String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// -----------------------------------------------------------------------------
+// 13. AUDIT LOGS (Compliance & Security)
+// -----------------------------------------------------------------------------
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String   // e.g. "USER_LOGIN", "MATCH_SCORE_UPDATE", "CERTIFICATE_GENERATED"
+  entity      String   // "Match", "Tournament", "User", "Equipment"
+  entityId    String?
+  ipAddress   String?
+  userAgent   String?
+  changesDiff Json?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}

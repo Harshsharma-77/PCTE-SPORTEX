@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+/* Glassmorphism effects */
+.glass-panel {
+  @apply bg-slate-900/70 backdrop-blur-md border border-slate-800/80 shadow-xl;
+}
+
+.glass-panel-glow {
+  @apply bg-slate-900/80 backdrop-blur-lg border border-sportex-500/30 shadow-[0_0_25px_-5px_rgba(14,141,231,0.2)];
+}
+
+/* Custom Sports Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #026fc5;
+}
