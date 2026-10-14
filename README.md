@@ -3,6 +3,10 @@
 > **Final-Year BTech CSE Capstone Project**  
 > **Institution**: Punjab College of Technical Education (PCTE)  
 > **Platform**: Production-Grade Sports Management, Live Match Telemetry & Athletic Analytics SaaS  
+> 
+> 🌐 **Live Web Application**: [https://pcte-sportex.vercel.app](https://pcte-sportex.vercel.app)  
+> ⚡ **Live Production API**: [https://pcte-sportex-api.onrender.com](https://pcte-sportex-api.onrender.com)  
+> 🗄️ **Database**: Serverless PostgreSQL (Neon Cloud)  
 
 ---
 
@@ -116,6 +120,44 @@ npm install
 npm run dev
 # Client runs on http://localhost:5173
 ```
+
+---
+
+## 🕹️ System Walkthrough & How to Use
+
+### 1. How to Schedule ("Plot") a Match
+1. Log in as **Super Admin** (`superadmin@pcte.edu.in`) or **Sports Admin** (`sportsadmin@pcte.edu.in`).
+2. Navigate to **Fixtures & Scheduling** (`/admin/fixtures`) from the left sidebar.
+3. Click the **"Schedule New Match"** button.
+4. Select the **Tournament**, **Home Team**, **Away Team**, **Venue Complex**, **Match Referee**, and **Date/Time**.
+5. The system automatically executes a **Venue Conflict Check** — if the ground is already booked for another match at that time, it prevents double-booking!
+6. Click **Schedule Fixture**. Your match will instantly appear in the schedule and public calendar!
+7. *Alternative:* Go to **Tournaments** (`/admin/tournaments`), select any cup, and click **"Generate Fixtures"** to automatically pair all registered teams in a knockout or round-robin bracket.
+
+### 2. How to Manage Teams & Sports Club Members
+1. Log in as **Super Admin** or **Sports Admin** and go to **Teams Directorate** (`/admin/teams`).
+2. Click **"Register New Team"** to create a departmental franchise (e.g., *CSE Cyber Strikers*, *ME Mechanical Titans*).
+3. Assign the head coach and select team jersey colors.
+4. To add student members to a team squad:
+   * Click on the team card or click **"Add Member"**.
+   * Select a registered student athlete, enter their **Jersey Number** (e.g., #10), set their tactical **Position** (Forward, Midfielder, Goalkeeper), and toggle whether they are **Team Captain**.
+5. *Coach Perspective:* The assigned coach (`coach.football@pcte.edu.in`) can log in, view their squad at `/coach/team`, and mark daily training attendance at `/coach/attendance`.
+
+### 3. How to Generate & Verify Certificates
+1. Log in as **Super Admin** or **Sports Admin** and go to **Certificate Issuer Hub** (`/admin/certificates`).
+2. Click the **"Issue New Certificate"** button.
+3. Choose the **Student Athlete**, the **Sport**, the **Tournament**, and the **Honor Type** (`WINNER`, `RUNNER_UP`, `THIRD_PLACE`, `PARTICIPATION`, `BEST_PLAYER`, `BEST_GOALKEEPER`, `FAIR_PLAY`).
+4. Click **"Generate & Issue Certificate"**.
+5. The system cryptographically generates a unique UUID verification token and official registry number (e.g. `SPORTEX/2026/FOOTBALL/0042`).
+6. The student athlete instantly receives an in-app notification and can view/download their certificate with an authentic QR code at `/student/certificates`.
+7. **Verification Test:** Anyone (including your professor) can open `/verify-certificate/:certificateId` or scan the QR code with a phone to verify the certificate against PostgreSQL with a green authenticity seal.
+
+### 4. How to Run Live Match Scoring (Real-Time WebSockets)
+1. Log in as **Referee** (`referee.sharma@pcte.edu.in` / `Password@123`).
+2. Navigate to **Referee Matches** (`/referee/matches`) and click **"Open Live Scoring Console"** on any scheduled match.
+3. Open a second browser tab (or student mobile browser) to `/live`.
+4. In the referee console, click **"Kickoff / Start Match"**, add a **Goal**, **Card**, or **Points**.
+5. Watch the viewer screen update **instantly in real time without refreshing the page!**
 
 ---
 
