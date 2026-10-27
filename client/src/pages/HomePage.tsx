@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Radio,
 } from 'lucide-react';
-import { ApiStatusBadge } from '../components/common/ApiStatusBadge';
 
 export const HomePage: React.FC = () => {
   const containerVariants: Variants = {
@@ -80,11 +79,6 @@ export const HomePage: React.FC = () => {
         animate="visible"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24"
       >
-        {/* Mobile Api Badge */}
-        <div className="lg:hidden mb-6 flex justify-center">
-          <ApiStatusBadge />
-        </div>
-
         {/* Hero Section */}
         <motion.div variants={itemVariants} className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-6 shadow-inner shadow-emerald-500/10">

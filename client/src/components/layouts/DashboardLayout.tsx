@@ -10,7 +10,7 @@ export const DashboardLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-slate-950 text-slate-100 antialiased overflow-hidden">
+    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased overflow-hidden transition-colors duration-200">
       {/* Desktop Collapsible Sidebar (Hidden on Mobile/Tablet) */}
       <div className="hidden lg:block h-screen sticky top-0">
         <Sidebar

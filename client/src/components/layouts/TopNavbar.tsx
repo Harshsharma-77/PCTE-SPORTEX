@@ -56,7 +56,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenMobileMenu }) => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full h-16 sm:h-20 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 w-full h-16 sm:h-20 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 transition-colors duration-200">
       {/* Left: Mobile Drawer Trigger + Breadcrumbs */}
       <div className="flex items-center gap-3">
         <button

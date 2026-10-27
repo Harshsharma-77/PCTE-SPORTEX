@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Trophy, Shield, Calendar, Users, Award, Bell, LogIn, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
-import { ApiStatusBadge } from './ApiStatusBadge';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -19,7 +18,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Brand Logo */}
@@ -31,10 +30,10 @@ export const Header: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-display font-black text-xl tracking-wider text-white">PCTE</span>
-                <span className="font-display font-bold text-xl tracking-wider bg-gradient-to-r from-sportex-400 to-cyan-400 bg-clip-text text-transparent">SPORTEX</span>
+                <span className="font-display font-black text-xl tracking-wider text-slate-900 dark:text-white">PCTE</span>
+                <span className="font-display font-bold text-xl tracking-wider bg-gradient-to-r from-sportex-500 to-cyan-500 bg-clip-text text-transparent">SPORTEX</span>
               </div>
-              <p className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase -mt-1">
+              <p className="text-[10px] font-semibold tracking-widest text-slate-500 dark:text-slate-400 uppercase -mt-1">
                 College Sports Management
               </p>
             </div>
@@ -51,8 +50,8 @@ export const Header: React.FC = () => {
                   to={link.path}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-sportex-600/20 text-sportex-300 border border-sportex-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                      ? 'bg-sportex-600/10 dark:bg-sportex-600/20 text-sportex-600 dark:text-sportex-300 border border-sportex-500/30'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -64,10 +63,6 @@ export const Header: React.FC = () => {
 
           {/* Right Action Area */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden lg:block">
-              <ApiStatusBadge />
-            </div>
-
             <ThemeToggle />
 
             {isAuthenticated && (
