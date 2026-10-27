@@ -1,63 +1,89 @@
 import React from 'react';
-import { Trophy, Github, Shield, Heart } from 'lucide-react';
+import { Trophy, Github, Shield, MapPin, Mail, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full border-t border-slate-800/80 bg-slate-950 mt-auto py-10">
+    <footer className="w-full border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 mt-auto py-10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Col 1 */}
-          <div className="space-y-3 md:col-span-2">
+          {/* Col 1: Institutional Branding */}
+          <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-sportex-600 flex items-center justify-center">
                 <Trophy className="w-4 h-4 text-white" />
               </div>
-              <span className="font-display font-bold text-lg text-white">PCTE SPORTEX</span>
+              <span className="font-display font-bold text-lg text-slate-900 dark:text-white">PCTE SPORTEX</span>
             </div>
-            <p className="text-sm text-slate-400 max-w-md leading-relaxed">
-              Official Sports Management & Real-Time Tournament Operations Platform for PCTE Group of Institutes. Built for high-performance collegiate athletics.
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Official Sports Management & Real-Time Tournament Operations Platform for PCTE Group of Institutes, Ludhiana.
             </p>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-              <Shield className="w-3.5 h-3.5 text-sportex-400" />
-              <span>Final Year BTech CSE Capstone Project &copy; 2026</span>
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+              <Shield className="w-3.5 h-3.5 text-sportex-500" />
+              <span>Directorate of Sports & Athletics</span>
             </div>
           </div>
 
-          {/* Col 2: Quick Links */}
+          {/* Col 2: Role Portals */}
           <div>
-            <h4 className="text-xs font-bold tracking-wider text-slate-300 uppercase mb-3">Portals</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
-              <li><a href="/login" className="hover:text-sportex-400 transition-colors">Admin & Sports Desk</a></li>
-              <li><a href="/login" className="hover:text-sportex-400 transition-colors">Coach Hub</a></li>
-              <li><a href="/login" className="hover:text-sportex-400 transition-colors">Referee Scoring App</a></li>
-              <li><a href="/login" className="hover:text-sportex-400 transition-colors">Student Athlete Center</a></li>
+            <h4 className="text-xs font-bold tracking-wider text-slate-900 dark:text-slate-200 uppercase mb-3">Campus Portals</h4>
+            <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+              <li><Link to="/login" className="hover:text-sportex-500 transition-colors">Sports Admin Directorate</Link></li>
+              <li><Link to="/login" className="hover:text-sportex-500 transition-colors">Varsity Coach Portal</Link></li>
+              <li><Link to="/login" className="hover:text-sportex-500 transition-colors">Referee Live Scoring Desk</Link></li>
+              <li><Link to="/login" className="hover:text-sportex-500 transition-colors">Student Athlete Center</Link></li>
             </ul>
           </div>
 
-          {/* Col 3: Architecture Info */}
+          {/* Col 3: Varsity Disciplines */}
           <div>
-            <h4 className="text-xs font-bold tracking-wider text-slate-300 uppercase mb-3">Tech Specs</h4>
-            <ul className="space-y-1.5 text-xs text-slate-400 font-mono">
-              <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-sportex-400" /> React 18 + TypeScript</li>
-              <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Node.js + Express</li>
-              <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> PostgreSQL + Prisma</li>
-              <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Socket.IO WebSockets</li>
+            <h4 className="text-xs font-bold tracking-wider text-slate-900 dark:text-slate-200 uppercase mb-3">Athletics & Features</h4>
+            <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+              <li><Link to="/tournaments" className="hover:text-sportex-500 transition-colors">Inter-Department Tournaments</Link></li>
+              <li><Link to="/fixtures" className="hover:text-sportex-500 transition-colors">Match Fixtures & Schedule</Link></li>
+              <li><Link to="/teams" className="hover:text-sportex-500 transition-colors">Campus Franchises & Squads</Link></li>
+              <li><Link to="/certificates/verify" className="hover:text-sportex-500 transition-colors">Digital Certificate Verification</Link></li>
             </ul>
+          </div>
+
+          {/* Col 4: Campus & Department Contact */}
+          <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+            <h4 className="text-xs font-bold tracking-wider text-slate-900 dark:text-slate-200 uppercase mb-3">Campus Contact</h4>
+            <div className="flex items-start gap-2">
+              <MapPin className="w-3.5 h-3.5 text-sportex-500 flex-shrink-0 mt-0.5" />
+              <span>PCTE Group of Institutes, Baddowal Campus, Ferozepur Road, Ludhiana, Punjab 142021</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="w-3.5 h-3.5 text-sportex-500 flex-shrink-0" />
+              <a href="mailto:sports@pcte.edu.in" className="hover:text-sportex-500 transition-colors">sports@pcte.edu.in</a>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-3.5 h-3.5 text-sportex-500 flex-shrink-0" />
+              <span>Dept. of Computer Science & Engineering</span>
+            </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-1">
-            <span>Crafted with</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-            <span>by BTech CSE Department, PCTE</span>
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-1.5 text-center sm:text-left">
+            <span>&copy; 2026 PCTE SPORTEX. Final Year Major Project by</span>
+            <span className="font-semibold text-slate-900 dark:text-white">Harsh Sharma & Team</span>
+            <span>(B.Tech CSE)</span>
           </div>
+
           <div className="flex items-center gap-4">
-            <span className="font-mono">v1.0.0-phase1-verified</span>
-            <div className="flex items-center gap-1 text-slate-400">
+            <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+              v1.0.0
+            </span>
+            <a
+              href="https://github.com/Harshsharma-77/PCTE-SPORTEX"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:text-sportex-500 transition-colors"
+            >
               <Github className="w-4 h-4" />
-              <span>Production Architecture</span>
-            </div>
+              <span>Source Repository</span>
+            </a>
           </div>
         </div>
       </div>
