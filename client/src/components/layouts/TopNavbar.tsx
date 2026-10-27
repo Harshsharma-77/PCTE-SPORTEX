@@ -1,5 +1,6 @@
 import React from 'react';
-import { Menu, LogOut, Key, User as UserIcon, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, LogOut, Key, User as UserIcon, LayoutDashboard, Search } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { ApiStatusBadge } from '../common/ApiStatusBadge';
@@ -8,7 +9,6 @@ import { NotificationDrawer } from '../common/NotificationDrawer';
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
 import { Dropdown } from '../ui/Dropdown';
 import { Avatar } from '../ui/Avatar';
-import { Search } from 'lucide-react';
 
 export interface TopNavbarProps {
   onOpenMobileMenu: () => void;
@@ -16,6 +16,7 @@ export interface TopNavbarProps {
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenMobileMenu }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = React.useState(false);
 
   const userDropdownItems = [
@@ -24,7 +25,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenMobileMenu }) => {
       label: 'My Hub Overview',
       icon: <LayoutDashboard className="w-3.5 h-3.5 text-sportex-400" />,
       onClick: () => {
-        window.location.href = '/dashboard';
+        navigate('/dashboard');
       },
     },
     {
@@ -32,15 +33,25 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenMobileMenu }) => {
       label: 'Profile Details',
       icon: <UserIcon className="w-3.5 h-3.5 text-slate-400" />,
       onClick: () => {
-        window.location.href = '/dashboard';
+        if (user?.role === 'STUDENT') {
+          navigate('/student/profile');
+        } else if (user?.role === 'COACH') {
+          navigate('/coach/team');
+        } else {
+          navigate('/dashboard');
+        }
       },
     },
     {
-      id: 'password',
-      label: 'Security & Password',
+      id: 'settings',
+      label: 'Settings & Security',
       icon: <Key className="w-3.5 h-3.5 text-slate-400" />,
       onClick: () => {
-        window.location.href = '/dashboard';
+        if (user?.role === 'SUPER_ADMIN' || user?.role === 'SPORTS_ADMIN') {
+          navigate('/admin/settings');
+        } else {
+          navigate('/dashboard');
+        }
       },
     },
     {
@@ -51,6 +62,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenMobileMenu }) => {
       dividerBefore: true,
       onClick: () => {
         logout();
+        navigate('/login');
       },
     },
   ];

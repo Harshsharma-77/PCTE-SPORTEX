@@ -66,7 +66,7 @@ export const VerifyCertificatePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Navigation & Brand Header */}
         <div className="flex items-center justify-between">
@@ -108,6 +108,38 @@ export const VerifyCertificatePage: React.FC = () => {
             <Skeleton variant="card" height={280} />
             <Skeleton variant="card" height={160} />
           </div>
+        )}
+
+        {/* Default Portal Welcome State (when no certificate is looked up yet) */}
+        {!isLoading && !verification && (
+          <Card variant="glass" className="p-8 sm:p-10 text-center space-y-5">
+            <div className="w-16 h-16 rounded-3xl bg-sportex-600/20 text-sportex-400 flex items-center justify-center mx-auto border border-sportex-500/30">
+              <QrCode className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                Official Digital Certificate Verification Portal
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-lg mx-auto mt-2 leading-relaxed">
+                PCTE SPORTEX utilizes cryptographic QR codes and cryptographic hashes to verify varsity athletic certificates. Enter a Certificate Number (e.g., <span className="font-mono text-sportex-500 font-semibold">SPORTEX/2026/FBT/1284</span>) or paste a verification identifier in the box above to validate authenticity against our cloud database.
+              </p>
+            </div>
+
+            <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">Instant Verification</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Directly validates against PostgreSQL sports registry.</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">Anti-Tamper Record</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Immutable certificate hash ensures certificate credentials are untampered.</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+                <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">Official Accreditation</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Recognized by PCTE Directorate of Sports for academic sports quota.</span>
+              </div>
+            </div>
+          </Card>
         )}
 
         {/* Verification Outcomes */}

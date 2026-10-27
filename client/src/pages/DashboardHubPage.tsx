@@ -213,30 +213,30 @@ export const DashboardHubPage: React.FC = () => {
 
           {/* Quick Role Navigation Modules Preview */}
           <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-md shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Upcoming Module Readiness</h3>
+            <h3 className="text-lg font-bold text-white mb-4">Core Platform Subsystems</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
                 <Trophy className="w-4 h-4 text-amber-400 mb-1.5" />
                 <h4 className="text-xs font-bold text-white">Tournaments</h4>
-                <p className="text-[10px] text-slate-400">Phase 9 Module</p>
+                <p className="text-[10px] text-emerald-400 font-medium">Bracket Engine Active</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
                 <Zap className="w-4 h-4 text-cyan-400 mb-1.5" />
                 <h4 className="text-xs font-bold text-white">Live Scoring</h4>
-                <p className="text-[10px] text-slate-400">Phase 11 WebSocket</p>
+                <p className="text-[10px] text-emerald-400 font-medium">WebSocket Streaming</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
                 <Users className="w-4 h-4 text-emerald-400 mb-1.5" />
                 <h4 className="text-xs font-bold text-white">Squad Rosters</h4>
-                <p className="text-[10px] text-slate-400">Phase 8 Management</p>
+                <p className="text-[10px] text-emerald-400 font-medium">Franchise Sync</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
                 <Award className="w-4 h-4 text-indigo-400 mb-1.5" />
                 <h4 className="text-xs font-bold text-white">QR Certificates</h4>
-                <p className="text-[10px] text-slate-400">Phase 15 Verification</p>
+                <p className="text-[10px] text-emerald-400 font-medium">Cryptographic UUID</p>
               </div>
             </div>
           </div>

@@ -1,13 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import {
-  Bell,
-  Settings,
-  Activity,
-  UserCheck,
-  User,
-  GraduationCap,
-} from 'lucide-react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -18,7 +10,9 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardHubPage } from './pages/DashboardHubPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ComponentsShowcasePage } from './pages/ComponentsShowcasePage';
-import { ModuleShellPage } from './pages/ModuleShellPage';
+import { InstitutionalDirectoryPage } from './pages/admin/InstitutionalDirectoryPage';
+import { AnnouncementsAdminPage } from './pages/admin/AnnouncementsAdminPage';
+import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { StudentDashboardPage } from './pages/student/StudentDashboardPage';
 import { CoachDashboardPage } from './pages/coach/CoachDashboardPage';
@@ -53,12 +47,17 @@ export const App: React.FC = () => {
                 <Route path="login" element={<LoginPage />} />
                 <Route path="unauthorized" element={<UnauthorizedPage />} />
                 <Route path="components-showcase" element={<ComponentsShowcasePage />} />
+                <Route path="tournaments" element={<ResultsAndStandingsPage />} />
+                <Route path="fixtures" element={<ResultsAndStandingsPage />} />
+                <Route path="teams" element={<TeamsAdminPage />} />
                 <Route path="live" element={<LiveMatchCenterPage />} />
                 <Route path="live/:matchId" element={<LiveMatchViewerPage />} />
                 <Route path="results" element={<ResultsAndStandingsPage />} />
                 <Route path="standings" element={<ResultsAndStandingsPage />} />
                 <Route path="leaderboards" element={<LeaderboardsAnalyticsPage />} />
                 <Route path="analytics" element={<LeaderboardsAnalyticsPage />} />
+                <Route path="certificates" element={<VerifyCertificatePage />} />
+                <Route path="certificates/verify" element={<VerifyCertificatePage />} />
                 <Route path="verify-certificate/:certificateId" element={<VerifyCertificatePage />} />
                 <Route path="verify-certificate" element={<VerifyCertificatePage />} />
                 <Route path="verify/:identifier" element={<VerifyCertificatePage />} />
@@ -93,96 +92,24 @@ export const App: React.FC = () => {
                 <Route path="admin" element={<RoleRoute allowedRoles={['SUPER_ADMIN', 'SPORTS_ADMIN']}><AdminDashboardPage /></RoleRoute>}>
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
-                  <Route
-                    path="users"
-                    element={
-                      <ModuleShellPage
-                        title="User & Identity Management"
-                        subtitle="Manage college staff, coaches, referees, and student athlete roles and accounts."
-                        category="Identity"
-                        targetPhase="Phase 4"
-                        icon={User}
-                        features={['Multi-role invite system', 'Account activation & suspension', 'Password reset dispatch', 'KYC & Student ID verification']}
-                      />
-                    }
-                  />
-                  <Route
-                    path="students"
-                    element={
-                      <ModuleShellPage
-                        title="Student Athletes Directory"
-                        subtitle="Departmental student athlete records, eligibility flags, and participation history."
-                        category="Roster"
-                        targetPhase="Phase 5"
-                        icon={GraduationCap}
-                        features={['Batch & semester directory', 'Medical fitness tracking', 'Sport varsity registrations', 'Disciplinary status']}
-                      />
-                    }
-                  />
+                  <Route path="users" element={<InstitutionalDirectoryPage initialTab="users" />} />
+                  <Route path="students" element={<InstitutionalDirectoryPage initialTab="students" />} />
                   <Route path="sports" element={<SportsAdminPage />} />
                   <Route path="teams" element={<TeamsAdminPage />} />
                   <Route path="players" element={<TeamsAdminPage />} />
-                  <Route
-                    path="coaches"
-                    element={
-                      <ModuleShellPage
-                        title="Coaching Staff"
-                        subtitle="Varsity head coaches, specializations, qualifications, and team allocations."
-                        category="Coaches"
-                        targetPhase="Phase 6"
-                        icon={UserCheck}
-                        features={['Coaching licenses (AFC, BCCI, NIS)', 'Assigned sports squads', 'Experience tracking', 'Coach bio & contact']}
-                      />
-                    }
-                  />
-                  <Route
-                    path="referees"
-                    element={
-                      <ModuleShellPage
-                        title="Referees & Match Officials"
-                        subtitle="Certified sports officials, licensing levels, and fixture assignment rosters."
-                        category="Officials"
-                        targetPhase="Phase 7"
-                        icon={Activity}
-                        features={['Officiating badges (District/State/National)', 'Certified sports array', 'Conflict of interest checks', 'Fixture assignment ledger']}
-                      />
-                    }
-                  />
+                  <Route path="coaches" element={<InstitutionalDirectoryPage initialTab="coaches" />} />
+                  <Route path="referees" element={<InstitutionalDirectoryPage initialTab="referees" />} />
                   <Route path="tournaments" element={<TournamentsAdminPage />} />
                   <Route path="fixtures" element={<FixturesAdminPage />} />
                   <Route path="results" element={<ResultsAndStandingsPage />} />
                   <Route path="venues" element={<VenuesManagementPage />} />
                   <Route path="inventory" element={<InventoryAdminPage />} />
                   <Route path="certificates" element={<CertificatesAdminPage />} />
-                  <Route
-                    path="announcements"
-                    element={
-                      <ModuleShellPage
-                        title="Announcements & Notices"
-                        subtitle="Broadcast sports bulletins, fixture updates, and varsity notices to students & coaches."
-                        category="Broadcast"
-                        targetPhase="Phase 14"
-                        icon={Bell}
-                        features={['Target audience filter (All, Coaches, Students)', 'Pinned priority bulletins', 'Expiry date scheduling', 'Real-time WebSocket alerts']}
-                      />
-                    }
-                  />
+                  <Route path="announcements" element={<AnnouncementsAdminPage />} />
                   <Route path="analytics" element={<LeaderboardsAnalyticsPage />} />
                   <Route path="feedback" element={<FeedbackDeskPage />} />
                   <Route path="audit-logs" element={<AuditLogsPage />} />
-                  <Route
-                    path="settings"
-                    element={
-                      <ModuleShellPage
-                        title="System Settings & Config"
-                        subtitle="Platform configuration, academic session years, and security parameters."
-                        category="Config"
-                        targetPhase="Phase 18"
-                        icon={Settings}
-                        features={['Academic year session switcher', 'Default scoring multipliers', 'Email & SMS notification gateway', 'Backup & maintenance']}
-                      />
-                    }
-                  />
+                  <Route path="settings" element={<SystemSettingsPage />} />
                 </Route>
 
                 {/* ========================================================= */}

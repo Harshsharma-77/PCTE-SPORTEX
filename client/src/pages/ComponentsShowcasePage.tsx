@@ -115,8 +115,8 @@ export const ComponentsShowcasePage: React.FC = () => {
     <div className="space-y-10">
       <PageHeader
         title="Design System & Reusable Components"
-        subtitle="Phase 3 UI/UX Design System reference, tokens, micro-interactions, and component catalog."
-        badge={<Badge variant="info">Phase 3 UI/UX</Badge>}
+        subtitle="Comprehensive UI/UX design tokens, micro-interactions, and component catalog."
+        badge={<Badge variant="info">Component Library</Badge>}
         actions={
           <Button
             variant="glow"

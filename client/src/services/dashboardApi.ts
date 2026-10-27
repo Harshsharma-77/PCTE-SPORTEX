@@ -17,6 +17,16 @@ export const dashboardApi = {
     return response.data.data;
   },
 
+  getInstitutionalDirectory: async (): Promise<{
+    users: any[];
+    students: any[];
+    coaches: any[];
+    referees: any[];
+  }> => {
+    const response = await apiClient.get('/dashboard/admin/directory');
+    return response.data.data;
+  },
+
   quickAddSport: async (data: any) => {
     const response = await apiClient.post('/dashboard/admin/quick-sport', data);
     return response.data;

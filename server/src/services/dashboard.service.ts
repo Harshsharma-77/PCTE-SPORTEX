@@ -487,4 +487,61 @@ export class DashboardService {
 
     return announcement;
   }
+
+  /**
+   * Institutional Directory (Athletes, Coaches, Match Officials, All Users)
+   */
+  static async getInstitutionalDirectory() {
+    const [users, students, coaches, referees] = await Promise.all([
+      prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          roleEnum: true,
+          phone: true,
+          isActive: true,
+          isVerified: true,
+          createdAt: true,
+          lastLoginAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      }),
+      prisma.student.findMany({
+        include: {
+          user: { select: { name: true, email: true, phone: true, isActive: true } },
+          teamMemberships: {
+            include: {
+              team: {
+                include: { sport: true },
+              },
+            },
+          },
+        },
+        orderBy: { rollNumber: 'asc' },
+        take: 100,
+      }),
+      prisma.coach.findMany({
+        include: {
+          user: { select: { name: true, email: true, phone: true, isActive: true } },
+          teams: {
+            include: { sport: true },
+          },
+        },
+        orderBy: { user: { name: 'asc' } },
+      }),
+      prisma.referee.findMany({
+        include: {
+          user: { select: { name: true, email: true, phone: true, isActive: true } },
+          _count: {
+            select: { matchesOfficiated: true },
+          },
+        },
+        orderBy: { user: { name: 'asc' } },
+      }),
+    ]);
+
+    return { users, students, coaches, referees };
+  }
 }

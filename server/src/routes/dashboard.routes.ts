@@ -13,6 +13,7 @@ router.use(authorizeRoles('SUPER_ADMIN', 'SPORTS_ADMIN'));
 router.get('/admin/summary', DashboardController.getAdminSummary);
 router.get('/admin/charts', DashboardController.getAdminCharts);
 router.get('/admin/quick-lookups', DashboardController.getQuickLookups);
+router.get('/admin/directory', DashboardController.getInstitutionalDirectory);
 
 // Quick Actions
 router.post('/admin/quick-sport', DashboardController.quickAddSport);

@@ -38,6 +38,18 @@ export class DashboardController {
     }
   }
 
+  static async getInstitutionalDirectory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const directory = await DashboardService.getInstitutionalDirectory();
+      return res.status(200).json({
+        success: true,
+        data: directory,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async quickAddSport(req: Request, res: Response, next: NextFunction) {
     try {
       const sport = await DashboardService.quickAddSport(req.body);

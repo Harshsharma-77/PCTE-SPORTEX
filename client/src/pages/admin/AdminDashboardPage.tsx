@@ -279,7 +279,7 @@ export const AdminDashboardPage: React.FC = () => {
         <PageHeader
           title="Athletic Command Center"
           subtitle="Real-time campus sports operations, tournament telemetry, and management."
-          badge={<Badge variant="info">Phase 4 Active</Badge>}
+          badge={<Badge variant="success">Directorate Online</Badge>}
         />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (

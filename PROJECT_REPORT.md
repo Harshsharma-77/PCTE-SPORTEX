@@ -267,4 +267,4 @@ stateDiagram-v2
 ---
 
 ## 9. Conclusion & Future Roadmap
-**PCTE SPORTEX** fulfills all requirements for a final-year B.Tech CSE Capstone Project. It represents a fully functional, production-grade SaaS architecture ready for institutional deployment across universities. Future enhancements may include AI-based athletic performance prediction, automated live video highlight generation, and biometric attendance integration.
+**PCTE SPORTEX** fulfills all requirements for a final-year B.Tech CSE Capstone Project. It represents a fully functional, production-grade SaaS architecture ready for institutional deployment across universities. Future enhancements may include predictive statistical athletic performance analytics, automated video highlight compilation, and biometric attendance integration.

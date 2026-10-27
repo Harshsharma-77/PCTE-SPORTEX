@@ -17,6 +17,7 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
 import { teamApi } from '../../services/teamApi';
 import { sportApi } from '../../services/sportApi';
 import { TeamItem } from '../../types/team';
@@ -24,6 +25,11 @@ import { SportItem } from '../../types/sport';
 
 export const TeamsAdminPage: React.FC = () => {
   const toast = useToast();
+  const { isAuthenticated, user } = useAuth();
+  const canManage = Boolean(
+    isAuthenticated &&
+      (user?.role === 'SUPER_ADMIN' || user?.role === 'SPORTS_ADMIN' || user?.role === 'COACH')
+  );
 
   const [teams, setTeams] = useState<TeamItem[]>([]);
   const [sports, setSports] = useState<SportItem[]>([]);
@@ -171,14 +177,16 @@ export const TeamsAdminPage: React.FC = () => {
               Sync
             </Button>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setCreateModalOpen(true)}
-              leftIcon={<Plus className="w-3.5 h-3.5" />}
-            >
-              Create Team
-            </Button>
+            {canManage && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setCreateModalOpen(true)}
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                Create Team
+              </Button>
+            )}
           </div>
         }
       />
@@ -251,17 +259,21 @@ export const TeamsAdminPage: React.FC = () => {
                     {team._count?.homeMatches || 0} Fixtures
                   </span>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedTeam(team);
-                      setAddMemberModalOpen(true);
-                    }}
-                    leftIcon={<UserPlus className="w-3.5 h-3.5" />}
-                  >
-                    Add Player
-                  </Button>
+                  {canManage ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedTeam(team);
+                        setAddMemberModalOpen(true);
+                      }}
+                      leftIcon={<UserPlus className="w-3.5 h-3.5" />}
+                    >
+                      Add Player
+                    </Button>
+                  ) : (
+                    <span className="text-[11px] text-sportex-400 font-medium">Varsity Squad</span>
+                  )}
                 </div>
               </div>
             ))}

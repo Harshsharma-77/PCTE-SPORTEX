@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Silent Refresh handling will be connected in Phase 2
+    // Global API error handler
     return Promise.reject(error);
   }
 );
