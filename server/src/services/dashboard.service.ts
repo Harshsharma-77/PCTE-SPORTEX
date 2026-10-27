@@ -1,6 +1,15 @@
 import { prisma } from '../config/database';
 import { AppError } from '../middleware/error.middleware';
-import { SportCategory, ScoringType, TournamentFormat, TournamentStatus, Priority } from '@prisma/client';
+import { hashPassword } from '../utils/password';
+import {
+  SportCategory,
+  ScoringType,
+  TournamentFormat,
+  TournamentStatus,
+  Priority,
+  UserRoleEnum,
+  Gender,
+} from '@prisma/client';
 
 export class DashboardService {
   /**
@@ -388,6 +397,86 @@ export class DashboardService {
     });
 
     return member;
+  }
+
+  /**
+   * Quick Action: Register New Student Athlete directly from Admin Console
+   */
+  static async quickRegisterAthlete(data: {
+    name: string;
+    email: string;
+    rollNumber: string;
+    department: string;
+    batchYear: number;
+    semester: number;
+    gender?: Gender;
+    phone?: string;
+    bloodGroup?: string;
+    teamId?: string;
+    jerseyNumber?: number;
+    position?: string;
+  }) {
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: data.email.toLowerCase().trim() },
+    });
+    if (existingEmail) {
+      throw new AppError('An account with this email address already exists.', 409);
+    }
+
+    const existingRoll = await prisma.student.findUnique({
+      where: { rollNumber: data.rollNumber.trim().toUpperCase() },
+    });
+    if (existingRoll) {
+      throw new AppError('A student with this roll number is already registered.', 409);
+    }
+
+    const studentRole = await prisma.role.findUnique({
+      where: { name: UserRoleEnum.STUDENT },
+    });
+
+    const passwordHash = await hashPassword('Student@2026');
+
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: data.email.toLowerCase().trim(),
+          passwordHash,
+          name: data.name.trim(),
+          roleId: studentRole?.id,
+          roleEnum: UserRoleEnum.STUDENT,
+          phone: data.phone,
+          isVerified: true,
+          student: {
+            create: {
+              rollNumber: data.rollNumber.trim().toUpperCase(),
+              department: data.department.trim().toUpperCase(),
+              batchYear: Number(data.batchYear),
+              semester: Number(data.semester),
+              gender: data.gender || Gender.MALE,
+              bloodGroup: data.bloodGroup,
+            },
+          },
+        },
+        include: {
+          student: true,
+        },
+      });
+
+      if (data.teamId && user.student) {
+        await tx.teamMember.create({
+          data: {
+            teamId: data.teamId,
+            studentId: user.student.id,
+            jerseyNumber: data.jerseyNumber ? Number(data.jerseyNumber) : null,
+            position: data.position || 'Player',
+          },
+        });
+      }
+
+      return user;
+    });
+
+    return result;
   }
 
   /**

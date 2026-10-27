@@ -89,6 +89,19 @@ export class DashboardController {
     }
   }
 
+  static async quickRegisterAthlete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const athlete = await DashboardService.quickRegisterAthlete(req.body);
+      return res.status(201).json({
+        success: true,
+        message: 'Student athlete registered successfully into varsity registry',
+        data: athlete,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async quickCreateTournament(req: Request, res: Response, next: NextFunction) {
     try {
       const tournament = await DashboardService.quickCreateTournament(req.body);

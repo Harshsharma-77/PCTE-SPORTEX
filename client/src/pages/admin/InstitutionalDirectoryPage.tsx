@@ -10,12 +10,14 @@ import {
   CheckCircle2,
   XCircle,
   Filter,
+  UserPlus,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
+import { Modal } from '../../components/ui/Modal';
 import { Tabs } from '../../components/ui/Tabs';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useToast } from '../../context/ToastContext';
@@ -46,7 +48,61 @@ export const InstitutionalDirectoryPage: React.FC<InstitutionalDirectoryProps> =
     referees: [],
   });
 
-  // Sync tab if prop changes
+  const [registerModalOpen, setRegisterModalOpen] = useState<boolean>(false);
+  const [regSubmitting, setRegSubmitting] = useState<boolean>(false);
+  const [newAthlete, setNewAthlete] = useState({
+    name: '',
+    email: '',
+    rollNumber: '',
+    department: 'CSE',
+    batchYear: 2024,
+    semester: 4,
+    gender: 'MALE',
+    phone: '',
+    bloodGroup: 'B+',
+  });
+
+  const handleRegisterAthleteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAthlete.name.trim() || !newAthlete.email.trim() || !newAthlete.rollNumber.trim()) {
+      toast.error('Please enter Full Name, Email, and University Roll Number.');
+      return;
+    }
+
+    try {
+      setRegSubmitting(true);
+      await dashboardApi.quickRegisterAthlete({
+        name: newAthlete.name.trim(),
+        email: newAthlete.email.trim(),
+        rollNumber: newAthlete.rollNumber.trim(),
+        department: newAthlete.department,
+        batchYear: Number(newAthlete.batchYear),
+        semester: Number(newAthlete.semester),
+        gender: newAthlete.gender,
+        phone: newAthlete.phone || undefined,
+        bloodGroup: newAthlete.bloodGroup || undefined,
+      });
+
+      toast.success(`Student athlete ${newAthlete.name} registered into varsity records!`);
+      setRegisterModalOpen(false);
+      setNewAthlete({
+        name: '',
+        email: '',
+        rollNumber: '',
+        department: 'CSE',
+        batchYear: 2024,
+        semester: 4,
+        gender: 'MALE',
+        phone: '',
+        bloodGroup: 'B+',
+      });
+      fetchDirectory();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to register athlete');
+    } finally {
+      setRegSubmitting(false);
+    }
+  };
   useEffect(() => {
     if (initialTab) {
       setActiveTab(initialTab);
@@ -144,15 +200,26 @@ export const InstitutionalDirectoryPage: React.FC<InstitutionalDirectoryProps> =
           </Badge>
         }
         actions={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={fetchDirectory}
-            isLoading={loading}
-            leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
-          >
-            Sync Directory
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchDirectory}
+              isLoading={loading}
+              leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            >
+              Sync Directory
+            </Button>
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setRegisterModalOpen(true)}
+              leftIcon={<UserPlus className="w-3.5 h-3.5" />}
+            >
+              Register Athlete
+            </Button>
+          </div>
         }
       />
 
@@ -505,6 +572,139 @@ export const InstitutionalDirectoryPage: React.FC<InstitutionalDirectoryProps> =
           )}
         </>
       )}
+
+      {/* Register Student Athlete Modal */}
+      <Modal
+        isOpen={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+        title="Register Varsity Student Athlete"
+        description="Enlist a student athlete into the PCTE varsity athletic records & rosters."
+        maxWidth="md"
+      >
+        <form onSubmit={handleRegisterAthleteSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Full Name"
+              placeholder="e.g. Gurpreet Singh"
+              value={newAthlete.name}
+              onChange={(e) => setNewAthlete({ ...newAthlete, name: e.target.value })}
+              required
+            />
+            <Input
+              label="College Email"
+              type="email"
+              placeholder="athlete@pcte.edu.in"
+              value={newAthlete.email}
+              onChange={(e) => setNewAthlete({ ...newAthlete, email: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="University Roll No"
+              placeholder="e.g. 2329288"
+              value={newAthlete.rollNumber}
+              onChange={(e) => setNewAthlete({ ...newAthlete, rollNumber: e.target.value })}
+              required
+            />
+            <Input
+              label="Phone Number (Optional)"
+              placeholder="+91 98765 43210"
+              value={newAthlete.phone}
+              onChange={(e) => setNewAthlete({ ...newAthlete, phone: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                Department
+              </label>
+              <select
+                value={newAthlete.department}
+                onChange={(e) => setNewAthlete({ ...newAthlete, department: e.target.value })}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+              >
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="ME">ME</option>
+                <option value="ECE">ECE</option>
+                <option value="BBA">BBA</option>
+                <option value="MBA">MBA</option>
+                <option value="BPHARM">BPHARM</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                Batch Year
+              </label>
+              <select
+                value={newAthlete.batchYear}
+                onChange={(e) => setNewAthlete({ ...newAthlete, batchYear: Number(e.target.value) })}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+              >
+                {[2021, 2022, 2023, 2024, 2025, 2026].map((yr) => (
+                  <option key={yr} value={yr}>
+                    {yr}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                Semester
+              </label>
+              <select
+                value={newAthlete.semester}
+                onChange={(e) => setNewAthlete({ ...newAthlete, semester: Number(e.target.value) })}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                  <option key={sem} value={sem}>
+                    Sem {sem}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                Gender
+              </label>
+              <select
+                value={newAthlete.gender}
+                onChange={(e) => setNewAthlete({ ...newAthlete, gender: e.target.value })}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+              >
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <Input
+              label="Blood Group"
+              placeholder="e.g. B+, O+, AB+"
+              value={newAthlete.bloodGroup}
+              onChange={(e) => setNewAthlete({ ...newAthlete, bloodGroup: e.target.value })}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+            <Button type="button" variant="ghost" onClick={() => setRegisterModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={regSubmitting}>
+              Register Athlete
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

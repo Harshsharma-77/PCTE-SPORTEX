@@ -19,6 +19,7 @@ router.get('/admin/directory', DashboardController.getInstitutionalDirectory);
 router.post('/admin/quick-sport', DashboardController.quickAddSport);
 router.post('/admin/quick-team', DashboardController.quickAddTeam);
 router.post('/admin/quick-player', DashboardController.quickAddPlayer);
+router.post('/admin/quick-athlete', DashboardController.quickRegisterAthlete);
 router.post('/admin/quick-tournament', DashboardController.quickCreateTournament);
 router.post('/admin/quick-match', DashboardController.quickScheduleMatch);
 router.post('/admin/quick-announcement', DashboardController.quickPublishAnnouncement);

@@ -42,6 +42,24 @@ export const dashboardApi = {
     return response.data;
   },
 
+  quickRegisterAthlete: async (data: {
+    name: string;
+    email: string;
+    rollNumber: string;
+    department: string;
+    batchYear: number;
+    semester: number;
+    gender?: string;
+    phone?: string;
+    bloodGroup?: string;
+    teamId?: string;
+    jerseyNumber?: number;
+    position?: string;
+  }) => {
+    const response = await apiClient.post('/dashboard/admin/quick-athlete', data);
+    return response.data;
+  },
+
   quickCreateTournament: async (data: any) => {
     const response = await apiClient.post('/dashboard/admin/quick-tournament', data);
     return response.data;

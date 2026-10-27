@@ -70,6 +70,13 @@ export const AdminDashboardPage: React.FC = () => {
   const [playerJersey, setPlayerJersey] = useState('');
   const [playerPosition, setPlayerPosition] = useState('');
   const [playerIsCaptain, setPlayerIsCaptain] = useState(false);
+  const [playerEnrollMode, setPlayerEnrollMode] = useState<'existing' | 'new'>('existing');
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerEmail, setNewPlayerEmail] = useState('');
+  const [newPlayerRoll, setNewPlayerRoll] = useState('');
+  const [newPlayerDept, setNewPlayerDept] = useState('CSE');
+  const [newPlayerBatch, setNewPlayerBatch] = useState(2024);
+  const [newPlayerSem, setNewPlayerSem] = useState(4);
 
   const [tournName, setTournName] = useState('');
   const [tournSportId, setTournSportId] = useState('');
@@ -184,18 +191,43 @@ export const AdminDashboardPage: React.FC = () => {
     e.preventDefault();
     setModalSubmitting(true);
     try {
-      await dashboardApi.quickAddPlayer({
-        studentId: playerStudentId,
-        teamId: playerTeamId,
-        jerseyNumber: playerJersey ? Number(playerJersey) : undefined,
-        position: playerPosition,
-        isCaptain: playerIsCaptain,
-      });
-      toast.success('Player enrolled into team squad roster!');
+      if (playerEnrollMode === 'new') {
+        if (!newPlayerName.trim() || !newPlayerEmail.trim() || !newPlayerRoll.trim()) {
+          toast.error('Please enter athlete name, email, and university roll number.');
+          setModalSubmitting(false);
+          return;
+        }
+
+        await dashboardApi.quickRegisterAthlete({
+          name: newPlayerName.trim(),
+          email: newPlayerEmail.trim(),
+          rollNumber: newPlayerRoll.trim(),
+          department: newPlayerDept,
+          batchYear: Number(newPlayerBatch),
+          semester: Number(newPlayerSem),
+          teamId: playerTeamId || undefined,
+          jerseyNumber: playerJersey ? Number(playerJersey) : undefined,
+          position: playerPosition || undefined,
+        });
+        toast.success(`Athlete "${newPlayerName}" registered and enrolled!`);
+      } else {
+        await dashboardApi.quickAddPlayer({
+          studentId: playerStudentId,
+          teamId: playerTeamId,
+          jerseyNumber: playerJersey ? Number(playerJersey) : undefined,
+          position: playerPosition,
+          isCaptain: playerIsCaptain,
+        });
+        toast.success('Player enrolled into team squad roster!');
+      }
+
       setActiveModal(null);
       setPlayerJersey('');
       setPlayerPosition('');
       setPlayerIsCaptain(false);
+      setNewPlayerName('');
+      setNewPlayerEmail('');
+      setNewPlayerRoll('');
       fetchDashboardData(false);
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || 'Failed to add player');
@@ -1030,26 +1062,136 @@ export const AdminDashboardPage: React.FC = () => {
         isOpen={activeModal === 'player'}
         onClose={() => setActiveModal(null)}
         title="Enroll Player into Squad Roster"
-        description="Link student athlete to team with position and jersey number."
+        description="Link an existing or newly registered student athlete to a team squad roster."
         maxWidth="md"
       >
         <form onSubmit={handleAddPlayer} className="space-y-4">
+          {/* Mode Switcher */}
+          <div className="flex rounded-xl bg-slate-900 p-1 border border-slate-800">
+            <button
+              type="button"
+              onClick={() => setPlayerEnrollMode('existing')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                playerEnrollMode === 'existing'
+                  ? 'bg-sportex-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Select Existing Student
+            </button>
+            <button
+              type="button"
+              onClick={() => setPlayerEnrollMode('new')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                playerEnrollMode === 'new'
+                  ? 'bg-sportex-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Register New Athlete
+            </button>
+          </div>
+
           <Select
-            label="Select Team"
+            label="Target Team Franchise"
             value={playerTeamId}
             onChange={(e) => setPlayerTeamId(e.target.value)}
             options={(lookups?.teams || []).map((t) => ({ value: t.id, label: t.name }))}
           />
 
-          <Select
-            label="Select Student Athlete"
-            value={playerStudentId}
-            onChange={(e) => setPlayerStudentId(e.target.value)}
-            options={(lookups?.students || []).map((s) => ({
-              value: s.id,
-              label: `${s.name} (Roll: ${s.rollNumber} - ${s.department})`,
-            }))}
-          />
+          {playerEnrollMode === 'existing' ? (
+            <Select
+              label="Select Student Athlete"
+              value={playerStudentId}
+              onChange={(e) => setPlayerStudentId(e.target.value)}
+              options={(lookups?.students || []).map((s) => ({
+                value: s.id,
+                label: `${s.name} (Roll: ${s.rollNumber} - ${s.department})`,
+              }))}
+            />
+          ) : (
+            <div className="space-y-3 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800">
+              <p className="text-[11px] font-bold text-sportex-400 uppercase tracking-wider">
+                New Athlete Credentials
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  label="Full Name"
+                  placeholder="e.g. Jasmeet Singh"
+                  value={newPlayerName}
+                  onChange={(e) => setNewPlayerName(e.target.value)}
+                  required
+                />
+                <Input
+                  label="College Email"
+                  type="email"
+                  placeholder="jasmeet@pcte.edu.in"
+                  value={newPlayerEmail}
+                  onChange={(e) => setNewPlayerEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <Input
+                  label="Roll Number"
+                  placeholder="2329299"
+                  value={newPlayerRoll}
+                  onChange={(e) => setNewPlayerRoll(e.target.value)}
+                  required
+                />
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Dept
+                  </label>
+                  <select
+                    value={newPlayerDept}
+                    onChange={(e) => setNewPlayerDept(e.target.value)}
+                    className="w-full px-2.5 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+                  >
+                    <option value="CSE">CSE</option>
+                    <option value="IT">IT</option>
+                    <option value="ME">ME</option>
+                    <option value="ECE">ECE</option>
+                    <option value="BBA">BBA</option>
+                    <option value="BPHARM">BPHARM</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Batch
+                  </label>
+                  <select
+                    value={newPlayerBatch}
+                    onChange={(e) => setNewPlayerBatch(Number(e.target.value))}
+                    className="w-full px-2.5 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+                  >
+                    {[2021, 2022, 2023, 2024, 2025, 2026].map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Sem
+                  </label>
+                  <select
+                    value={newPlayerSem}
+                    onChange={(e) => setNewPlayerSem(Number(e.target.value))}
+                    className="w-full px-2.5 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-sportex-500"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                      <option key={s} value={s}>
+                        Sem {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -1084,7 +1226,7 @@ export const AdminDashboardPage: React.FC = () => {
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={modalSubmitting}>
-              Enroll Player
+              {playerEnrollMode === 'new' ? 'Register & Enroll' : 'Enroll Player'}
             </Button>
           </div>
         </form>

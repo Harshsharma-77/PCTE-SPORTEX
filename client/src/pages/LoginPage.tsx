@@ -424,9 +424,9 @@ export const LoginPage: React.FC = () => {
                       leftIcon={<GraduationCap className="w-4 h-4" />}
                     />
                     <Input
-                      label="Password (min 8 chars, 1 uppercase, 1 number)"
+                      label="Password (min 6 characters)"
                       type="password"
-                      placeholder="Create secure password"
+                      placeholder="Enter a secure password"
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
                       required
