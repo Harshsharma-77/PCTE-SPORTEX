@@ -321,4 +321,5 @@ def create_synopsis_docx(output_path):
     print(f"Successfully generated Word Document at: {output_path}")
 
 if __name__ == '__main__':
+    create_synopsis_docx("c:\\Users\\Admin\\Desktop\\AQUA\\pcte-sportex\\Harsh Sharma PCTE SPORTEX Project Synopsis.docx")
     create_synopsis_docx("c:\\Users\\Admin\\Desktop\\AQUA\\pcte-sportex\\PCTE_SPORTEX_Project_Synopsis.docx")
